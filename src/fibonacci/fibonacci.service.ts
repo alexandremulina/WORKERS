@@ -1,25 +1,49 @@
 import { Injectable, OnApplicationShutdown } from '@nestjs/common';
-import Piscina from 'piscina';
+import * as path from 'path';
+import { Worker } from 'worker_threads';
 
 @Injectable()
 export class FibonacciService implements OnApplicationShutdown {
-  private piscina: Piscina;
+  private workers: Worker[] = [];
 
-  constructor() {
-    this.piscina = new Piscina({
-      filename: require.resolve('./fibonacci.worker'),
-      minThreads: 2, // Minimum number of worker threads
-      maxThreads: 10, // Maximum number of worker threads
-      concurrentTasksPerWorker: 1, // Number of tasks a worker can handle concurrently
+  constructor() {}
+
+  calculateFibonacci(n: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const worker = new Worker(
+        path.resolve(__dirname, './fibonacci.worker.js'),
+        {
+          workerData: n,
+        },
+      );
+
+      this.workers.push(worker);
+
+      worker.on('message', (result) => {
+        resolve(result);
+      });
+
+      worker.on('error', (err) => {
+        reject(err);
+      });
+
+      worker.on('exit', () => {
+        this.workers = this.workers.filter((w) => w !== worker);
+      });
     });
   }
 
-  calculateFibonacci(n: number): Promise<number> {
-    return this.piscina.run(n);
-  }
+  async onApplicationShutdown() {
+    await Promise.all(
+      this.workers.map((worker) => {
+        return new Promise<void>((resolve) => {
+          worker.on('exit', () => {
+            resolve();
+          });
 
-  onApplicationShutdown() {
-    // Terminate the worker threads on application shutdown
-    this.piscina.destroy();
+          worker.terminate();
+        });
+      }),
+    );
   }
 }

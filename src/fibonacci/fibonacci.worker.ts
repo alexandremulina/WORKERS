@@ -1,20 +1,10 @@
-const fibonacci = (n: number): number => {
-  console.log(`Worker thread started for n = ${n}`);
+const { parentPort, workerData } = require('worker_threads');
 
-  if (n <= 1) {
-    return n;
+function fibonacci(num) {
+  if (num <= 1) {
+    return num;
   }
-  let prev = 0;
-  let current = 1;
-  for (let i = 2; i <= n; i++) {
-    const next = prev + current;
-    prev = current;
-    current = next;
-    console.log(`Intermediate result for n = ${n}: ${current}`);
-  }
+  return fibonacci(num - 1) + fibonacci(num - 2);
+}
 
-  console.log(`Worker thread completed for n = ${n}`);
-  return current;
-};
-
-module.exports = fibonacci;
+parentPort.postMessage(fibonacci(workerData));
