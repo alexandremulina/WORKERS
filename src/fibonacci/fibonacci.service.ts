@@ -8,9 +8,9 @@ export class FibonacciService implements OnApplicationShutdown {
   constructor() {
     this.piscina = new Piscina({
       filename: require.resolve('./fibonacci.worker'),
-      minThreads: 2, // Minimum number of worker threads
-      maxThreads: 10, // Maximum number of worker threads
-      concurrentTasksPerWorker: 1, // Number of tasks a worker can handle concurrently
+      minThreads: 10, // Minimum number of worker threads
+      maxThreads: 100, // Maximum number of worker threads
+      concurrentTasksPerWorker: 10, // Number of tasks a worker can handle concurrently
     });
   }
 

@@ -1,6 +1,4 @@
 const fibonacci = (n: number): number => {
-  console.log(`Worker thread started for n = ${n}`);
-
   if (n <= 1) {
     return n;
   }
@@ -10,10 +8,8 @@ const fibonacci = (n: number): number => {
     const next = prev + current;
     prev = current;
     current = next;
-    console.log(`Intermediate result for n = ${n}: ${current}`);
   }
 
-  console.log(`Worker thread completed for n = ${n}`);
   return current;
 };
 
