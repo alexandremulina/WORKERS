@@ -1,10 +1,16 @@
-const { parentPort, workerData } = require('worker_threads');
-
-function fibonacci(num) {
-  if (num <= 1) {
-    return num;
+const fibonacci = (n: number): number => {
+  if (n <= 1) {
+    return n;
   }
-  return fibonacci(num - 1) + fibonacci(num - 2);
-}
+  let prev = 0;
+  let current = 1;
+  for (let i = 2; i <= n; i++) {
+    const next = prev + current;
+    prev = current;
+    current = next;
+  }
 
-parentPort.postMessage(fibonacci(workerData));
+  return current;
+};
+
+module.exports = fibonacci;
